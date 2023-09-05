@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(UntitledOpen VERSION 1.0.0.0)
-project(test)
 
 set(CMAKE_C_STANDARD 99)
 
@@ -13,7 +12,6 @@ if (BUILD_VARIANT_STATIC)
 endif()
 
 add_library(UntitledOpen ${UOPEN_LIBRARY_TYPE} UntitledOpen.c UntitledOpen.h)
-add_executable(test "UntitledOpen.h" "main.c")
 
 target_compile_definitions(UntitledOpen PRIVATE UVK_LOG_EXPORT_FROM_LIBRARY UVK_LIB_COMPILE)
 target_compile_definitions(UntitledOpen PUBLIC UIMGUI_OPEN_SUBMODULE_ENABLED)
@@ -21,7 +19,6 @@ list(APPEND compile_defs "UIMGUI_OPEN_SUBMODULE_ENABLED")
 
 target_link_directories(UntitledOpen PUBLIC "./Bindings/target/release/")
 target_link_libraries(UntitledOpen UntitledOpenBindings pthread dl)
-target_link_libraries(test UntitledOpen)
 
 configure_file(UntitledOpen.pc.in UntitledOpen.pc @ONLY)
 
