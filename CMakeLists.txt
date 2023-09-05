@@ -18,8 +18,10 @@ target_compile_definitions(UntitledOpen PUBLIC UIMGUI_OPEN_SUBMODULE_ENABLED)
 list(APPEND compile_defs "UIMGUI_OPEN_SUBMODULE_ENABLED")
 
 target_link_directories(UntitledOpen PUBLIC "./Bindings/target/release/")
-if (NOT WIN32)
+if (WIN32)
     target_link_libraries(UntitledOpen UntitledOpenBindings pthread dl)
+else()
+    target_link_libraries(UntitledOpen UntitledOpenBindings)
 endif()
 
 configure_file(UntitledOpen.pc.in UntitledOpen.pc @ONLY)
