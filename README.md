@@ -14,14 +14,14 @@ To build, use CMake, either by using it from the CLI or by adding this project a
 ## API
 Call the `open` function with a URL string as its only argument:
 ```c
-open("https://madladsquad.com/");
+UOpen("https://madladsquad.com/");
 ```
 File URLs, as standardised by the 
 [freedesktop-uri-spec](https://www.freedesktop.org/wiki/Specifications/file-uri-spec/) are also accepted.
 
 Additionally, the `reveal` function can open a file browser for a file or directory:
 ```c
-reveal("./");
+UReveal("./");
 ```
 
 ## Dependencies
