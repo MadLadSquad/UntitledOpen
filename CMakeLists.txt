@@ -19,7 +19,7 @@ list(APPEND compile_defs "UIMGUI_OPEN_SUBMODULE_ENABLED")
 
 target_link_directories(UntitledOpen PUBLIC "./Bindings/target/release/")
 if (WIN32)
-    target_link_libraries(UntitledOpen UntitledOpenBindings)
+    target_link_libraries(UntitledOpen UntitledOpenBindings dl)
 else()
     target_link_libraries(UntitledOpen UntitledOpenBindings pthread dl)
 endif()
