@@ -1,0 +1,52 @@
+name: CI
+env:
+  BUILD_CONFIGURATION: Release
+on: [push, pull_request]
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Checkout submodules
+      shell: bash
+      run: |
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Get dependencies
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install gcc make g++ libtool cmake libyaml-cpp-dev
+    - name: Build
+      run: "bash ci.sh"
+  Windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Checkout submodules
+      shell: bash
+      run: |
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Set MSBuild env
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build for engine
+      run: "bash ci.sh"
+  MacOS:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Checkout submodules
+      shell: bash
+      run: |
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Get dependencies
+      shell: bash
+      run: brew install yaml-cpp
+    - name: Build
+      run: "bash ci.sh"

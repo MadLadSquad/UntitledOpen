@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+Bindings/Cargo.lock
+
+main.cpp
+cmake-build-*/
+build/
+.vs/
+.idea/
+main.c
+Bindings/target/
+!Bindings/target/release/libUntitledOpenBindings.a
