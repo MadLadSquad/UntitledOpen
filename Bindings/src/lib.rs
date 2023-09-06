@@ -3,10 +3,7 @@
 extern crate libc;
 extern crate opener;
 
-use std::slice;
 use std::ffi::CStr;
-//use rfd::FileDialog;
-use std::mem;
 
 fn from_c(ptr: *const libc::c_char) -> String {
     let c_str: &CStr = unsafe{ CStr::from_ptr(ptr) };
