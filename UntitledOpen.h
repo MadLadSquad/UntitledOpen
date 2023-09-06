@@ -22,9 +22,8 @@
 extern "C"
 {
 #endif
-
-UVK_PUBLIC_API void UOpen(const char* url);
-UVK_PUBLIC_API void UReveal(const char* url);
+    UVK_PUBLIC_API void UOpen(const char* url);
+    UVK_PUBLIC_API void UReveal(const char* url);
 
 #ifdef __cplusplus
 }
