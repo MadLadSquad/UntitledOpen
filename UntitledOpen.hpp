@@ -37,8 +37,9 @@ namespace UOpen
         explicit Result(const UOpen_Result& res) noexcept;
 
         std::vector<UniqueString> getPaths() noexcept;
-        UniqueString getPath(size_t i) noexcept;
-        Status status() noexcept;
+        UniqueString getPath(size_t i) const noexcept;
+        size_t getPathNum() noexcept;
+        Status status() const noexcept;
     private:
         UOpen_Result result{};
     };

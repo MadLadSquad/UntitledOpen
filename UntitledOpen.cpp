@@ -24,21 +24,33 @@ std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
     {
         if (result.operation == UOPEN_PICK_MULTIPLE)
         {
-            for (size_t i = 0; i < UOpen_getPathCount(&result); i++)
+            res.resize(UOpen_getPathCount(&result));
+            for (size_t i = 0; i < res.size(); i++)
             {
                 char* pt;
                 auto r = NFD_PathSet_GetPathU8(result.data, i, &pt);
                 if (r == (nfdresult_t)UOPEN_STATUS_SUCCESS)
-                    res.emplace_back(UniqueString{ pt, UOpen_freePathMultiple });
+                {
+                    res[i].data = pt;
+                    res[i].freeFunc = UOpen_freePathMultiple;
+                }
             }
         }
         else
-            res = { UniqueString{ (const char*)result.data } };
+        {
+            res.emplace_back();
+            res[0].data = (char*)result.data;
+            res[0].freeFunc = [](char* d) -> void {
+                if (d != nullptr)
+                    NFD_FreePath(d);
+                d = nullptr;
+            };
+        }
     }
     return res;
 }
 
-UOpen::UniqueString UOpen::Result::getPath(size_t i) noexcept
+UOpen::UniqueString UOpen::Result::getPath(size_t i) const noexcept
 {
     if (result.data != nullptr && result.status == UOPEN_STATUS_SUCCESS)
     {
@@ -57,9 +69,14 @@ UOpen::UniqueString UOpen::Result::getPath(size_t i) noexcept
     return {};
 }
 
-UOpen::Status UOpen::Result::status() noexcept
+UOpen::Status UOpen::Result::status() const noexcept
 {
     return result.status;
+}
+
+size_t UOpen::Result::getPathNum() noexcept
+{
+    return UOpen_getPathCount(&result);
 }
 
 UOpen::Result UOpen::pickFile(UOpen::PickerOperation op, const UOpen::Filter* filters, size_t filtersNum, const char* defaultName, const char* defaultPath) noexcept

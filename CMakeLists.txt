@@ -10,11 +10,8 @@ include_directories(. NFD/src/include/)
 set(UOPEN_LIBRARY_TYPE "SHARED")
 if (BUILD_VARIANT_STATIC)
     set(UOPEN_LIBRARY_TYPE "STATIC")
-    set(BUILD_SHARED_LIBS OFF)
 endif()
 add_subdirectory(NFD)
-
-set(BUILD_SHARED_LIBS OFF)
 
 add_library(UntitledOpen ${UOPEN_LIBRARY_TYPE} C/CUntitledOpen.c C/CUntitledOpen.h Common.h UntitledOpen.cpp UntitledOpen.hpp)
 
