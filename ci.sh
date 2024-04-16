@@ -1,8 +1,4 @@
 #!/bin/bash
-cd Bindings/
-cargo build --release
-cd ..
-
 cpus=$(grep -c processor /proc/cpuinfo) || cpus=$(sysctl -n hw.ncpu)
 
 mkdir build
