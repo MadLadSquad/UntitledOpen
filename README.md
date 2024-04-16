@@ -4,9 +4,10 @@
 [![trello](https://img.shields.io/badge/Trello-UDE-blue])](https://trello.com/b/HmfuRY2K/untitleddesktop)
 [![Discord](https://img.shields.io/discord/717037253292982315.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/4wgH8ZE)
 
-C bindins for the [opener](https://github.com/Seeker14491/opener) library. Since the library is written in Rust,
-we decided to write C bindings for it, so we can use it in the 
-[UntitledImGuiFramework](https://github.com/MadLadSquad/UntitledImGuiFramework).
+A wrapper on top of a number of libraries for opening links and file pickers natively.
+
+Libraries:
+1. [nativefiledialog-extended](https://github.com/MadLadSquad/nativefiledialog-extended) - File picker operations
 
 ## Building
 To build, use CMake, either by using it from the CLI or by adding this project as a subdirectory.

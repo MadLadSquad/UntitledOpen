@@ -5,7 +5,7 @@ includedir="${prefix}/include"
 compile_defs="@compile_defs@"
 
 Name: @PROJECT_NAME@
-Description: C bindings for the "opener" Rust library
+Description: A wrapper on top of a number of libraries for opening links and file pickers natively
 URL: https://github.com/MadLadSquad/UntitledOpen
 Version: @PROJECT_VERSION@
 Cflags: -I"${includedir}"
