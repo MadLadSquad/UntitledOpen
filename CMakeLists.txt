@@ -20,6 +20,9 @@ target_compile_definitions(UntitledOpen PUBLIC UIMGUI_OPEN_SUBMODULE_ENABLED)
 list(APPEND compile_defs "UIMGUI_OPEN_SUBMODULE_ENABLED")
 
 target_link_libraries(UntitledOpen nfd)
+if (APPLE)
+    target_link_libraries(UntitledOpen PRIVATE "-framework CoreFoundation" "-framework ApplicationServices")
+endif()
 
 configure_file(UntitledOpen.pc.in UntitledOpen.pc @ONLY)
 
