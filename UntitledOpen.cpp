@@ -140,7 +140,6 @@ void UOpen::openURI(const char* link) noexcept
 #ifdef _WIN32
     ShellExecuteA(NULL, NULL, link, NULL, NULL, SW_SHOW);
 #elif __APPLE__
-    #error Compiling on apple
     CFURLRef url = CFURLCreateWithBytes(NULL, (UInt8*)link, strlen(link), kCFStringEncodingASCII, NULL);
     LSOpenCFURLRef(url, 0);
     CFRelease(url);
