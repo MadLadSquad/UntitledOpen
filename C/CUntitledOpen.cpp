@@ -1,6 +1,11 @@
 #include "CUntitledOpen.h"
 #include <nfd.h>
 
+namespace UOpen
+{
+    extern void openURI(const char* link) noexcept;
+};
+
 void UOpen_init()
 {
     NFD_Init();
@@ -13,7 +18,7 @@ void UOpen_destroy()
 
 UOpen_Result UOpen_pickFile(UOpen_PickerOperation op, const UOpen_Filter* filters, size_t filtersNum, const char* defaultPath, const char* defaultName)
 {
-    UOpen_Result result = { .operation = op, .data = NULL };
+    UOpen_Result result = { .operation = op, .data = nullptr };
 
     switch (op)
     {
@@ -40,20 +45,20 @@ const char* UOpen_getPickerError()
 
 void UOpen_freeResult(UOpen_Result* result)
 {
-    if (result->data != NULL && result->status == UOPEN_STATUS_SUCCESS)
+    if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation != UOPEN_PICK_MULTIPLE)
-            NFD_FreePath(result->data);
+            NFD_FreePath((char*)result->data);
         else
             NFD_PathSet_Free(result->data);
-        result->data = NULL;
+        result->data = nullptr;
     }
 }
 
 size_t UOpen_getPathCount(UOpen_Result* result)
 {
     size_t count = 0;
-    if (result->data != NULL && result->status == UOPEN_STATUS_SUCCESS)
+    if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation == UOPEN_PICK_MULTIPLE)
             NFD_PathSet_GetCount(result->data, (nfdpathsetsize_t*)&count);
@@ -66,14 +71,19 @@ size_t UOpen_getPathCount(UOpen_Result* result)
 const char* UOpen_getPathMultiple(UOpen_Result* result, size_t i)
 {
     char* res;
-    if (NFD_PathSet_GetPath(result->data, i, &res) != UOPEN_STATUS_SUCCESS)
-        return NULL;
+    if ((UOpen_Status)NFD_PathSet_GetPath(result->data, i, &res) != UOPEN_STATUS_SUCCESS)
+        return nullptr;
     return res;
 }
 
 void UOpen_freePathMultiple(char* path)
 {
-    if (path != NULL)
+    if (path != nullptr)
         NFD_PathSet_FreePath(path);
-    path = NULL;
+    path = nullptr;
+}
+
+void UOpen_openURI(const char* link)
+{
+    UOpen::openURI(link);
 }

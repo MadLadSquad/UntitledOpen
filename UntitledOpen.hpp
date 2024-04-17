@@ -78,4 +78,8 @@ namespace UOpen
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin
     UVK_PUBLIC_API const char* getPickerError() noexcept;
+
+    // Opens a URI using the default system application
+    // Event Safety - begin, style, post-begin
+    UVK_PUBLIC_API void openURI(const char* link) noexcept;
 }

@@ -40,6 +40,10 @@ extern "C"
     // Frees a path when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
     UVK_PUBLIC_API void UOpen_freePathMultiple(char* path);
+
+    // Opens a URI using the default system application
+    // Event Safety - begin, style, post-begin
+    UVK_PUBLIC_API void UOpen_openURI(const char* link);
 #ifdef __cplusplus
 }
 #endif

@@ -2,6 +2,16 @@
 #include "C/CUntitledOpen.h"
 #include <nfd.h>
 
+#ifdef _WIN32
+    #include <windows.h>
+    #include <shellapi.h>
+#elif __APPLE__
+    #include <CoreFoundation/CFBundle.h>
+    #include <ApplicationServices/ApplicationServices.h>
+#else
+
+#endif
+
 void UOpen::init() noexcept
 {
     UOpen_init();
@@ -123,4 +133,17 @@ UOpen::UniqueString::~UniqueString() noexcept
 UOpen::UniqueString::operator const char*() const noexcept
 {
     return data;
+}
+
+void UOpen::openURI(const char* link) noexcept
+{
+#ifdef _WIN32
+    ShellExecuteA(NULL, NULL, link, NULL, NULL, SW_SHOW);
+#elif __APPLE__
+    CFURLRef url = CFURLCreateWithBytes(NULL, (UInt8*)link, strlen(link), kCFStringEncodingASCII, NULL);
+    LSOpenCFURLRef(url, 0);
+    CFRelease(url);
+#else
+
+#endif
 }

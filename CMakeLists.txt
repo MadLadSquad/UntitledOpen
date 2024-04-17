@@ -13,7 +13,7 @@ if (BUILD_VARIANT_STATIC)
 endif()
 add_subdirectory(NFD)
 
-add_library(UntitledOpen ${UOPEN_LIBRARY_TYPE} C/CUntitledOpen.c C/CUntitledOpen.h Common.h UntitledOpen.cpp UntitledOpen.hpp)
+add_library(UntitledOpen ${UOPEN_LIBRARY_TYPE} C/CUntitledOpen.cpp C/CUntitledOpen.h Common.h UntitledOpen.cpp UntitledOpen.hpp)
 
 target_compile_definitions(UntitledOpen PRIVATE UVK_LOG_EXPORT_FROM_LIBRARY UVK_LIB_COMPILE)
 target_compile_definitions(UntitledOpen PUBLIC UIMGUI_OPEN_SUBMODULE_ENABLED)
