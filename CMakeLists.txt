@@ -28,8 +28,8 @@ configure_file(UntitledOpen.pc.in UntitledOpen.pc @ONLY)
 
 if (UIMGUI_INSTALL)
     install(TARGETS UntitledOpen
-            LIBRARY DESTINATION lib/
-            ARCHIVE DESTINATION lib/)
+            LIBRARY DESTINATION lib64/
+            ARCHIVE DESTINATION lib64/)
     install(FILES UntitledOpen.hpp Common.h DESTINATION include/UntitledOpen)
     install(FILES C/CUntitledOpen.h DESTINATION include/UntitledOpen/C)
     install(FILES ${PROJECT_BINARY_DIR}/UntitledOpen.pc
