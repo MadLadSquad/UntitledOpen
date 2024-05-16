@@ -9,6 +9,7 @@ namespace UOpen
     typedef UOpen_PickerOperation PickerOperation;
 
     // Wrapper class that introduces RAII to strings
+    // UntitledImGuiFramework Event Safety - Any time
     class UVK_PUBLIC_API UniqueString
     {
     public:
@@ -30,6 +31,7 @@ namespace UOpen
     };
 
     // Picker result class
+    // UntitledImGuiFramework Event Safety - Any time
     class UVK_PUBLIC_API Result
     {
     public:
