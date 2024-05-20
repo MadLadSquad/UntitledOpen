@@ -81,7 +81,12 @@ namespace UOpen
     // Event Safety - begin, style, post-begin
     UVK_PUBLIC_API const char* getPickerError() noexcept;
 
-    // Opens a URI using the default system application
-    // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void openURI(const char* link) noexcept;
+    /**
+     * @brief Opens a URI using the default system application
+     * @arg link - URI to open
+     * @arg parentWindow - Parent window string. Leave as "" if you don't have a parent window or if you're on Windows or macOS X.
+     * More info: https://flatpak.github.io/xdg-desktop-portal/docs/window-identifiers.html
+     * @note Event Safety - begin, style, post-begin
+     */
+    UVK_PUBLIC_API void openURI(const char* link, const char* parentWindow = "") noexcept;
 }

@@ -1,6 +1,9 @@
 #include "UntitledOpen.hpp"
 #include "C/CUntitledOpen.h"
 #include <nfd.h>
+#include <string>
+#include <cstring>
+#include <iostream>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -9,7 +12,8 @@
     #include <CoreFoundation/CFBundle.h>
     #include <ApplicationServices/ApplicationServices.h>
 #else
-
+    #include <dbus/dbus.h>
+    #include <fcntl.h>
 #endif
 
 void UOpen::init() noexcept
@@ -135,7 +139,7 @@ UOpen::UniqueString::operator const char*() const noexcept
     return data;
 }
 
-void UOpen::openURI(const char* link) noexcept
+void UOpen::openURI(const char* link, const char* parentWindow) noexcept
 {
 #ifdef _WIN32
     ShellExecuteA(NULL, NULL, link, NULL, NULL, SW_SHOW);
@@ -144,6 +148,80 @@ void UOpen::openURI(const char* link) noexcept
     LSOpenCFURLRef(url, 0);
     CFRelease(url);
 #else
+    std::string links = link;
+    std::string method = "OpenURI";
 
+    dbus_bool_t bWritable = true;
+    dbus_bool_t bAsk = false;
+
+    void* data = (void*)link;
+    int fd = 0;
+
+    int linkType = DBUS_TYPE_STRING;
+
+    if (links.starts_with("file://"))
+    {
+        method = "OpenFile";
+        bAsk = true;
+
+        fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
+        data = (void*)fd; // TODO: Check if this is how it should be handled
+        linkType = DBUS_TYPE_UNIX_FD;
+    }
+
+    DBusError error;
+    dbus_error_init(&error);
+
+    DBusConnection* connection = dbus_bus_get(DBUS_BUS_SESSION, &error);
+
+    if (dbus_error_is_set(&error))
+    {
+        std::cout << error.message << std::endl;
+        return; // TODO: handle error
+    }
+
+    DBusMessage* message = dbus_message_new_method_call("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop", "org.freedesktop.portal.OpenURI", method.c_str());
+    dbus_message_append_args(message, DBUS_TYPE_STRING, &parentWindow, linkType, &data, DBUS_TYPE_INVALID);
+
+    DBusMessageIter root;
+    DBusMessageIter pair;
+    DBusMessageIter sub;
+    DBusMessageIter value;
+
+    static constexpr const char* writable = "writable";
+    static constexpr const char* ask = "ask";
+
+    dbus_message_iter_init_append(message, &root);
+    dbus_message_iter_open_container(&root, DBUS_TYPE_ARRAY, "{sv}", &pair);
+
+    dbus_message_iter_open_container(&pair, DBUS_TYPE_DICT_ENTRY, nullptr, &sub);
+    dbus_message_iter_append_basic(&sub, DBUS_TYPE_STRING, &writable);
+        dbus_message_iter_open_container(&sub, DBUS_TYPE_VARIANT, DBUS_TYPE_BOOLEAN_AS_STRING, &value);
+        dbus_message_iter_append_basic(&value, DBUS_TYPE_BOOLEAN, &bWritable);
+        dbus_message_iter_close_container(&sub, &value);
+    dbus_message_iter_close_container(&pair, &sub);
+
+    dbus_message_iter_open_container(&pair, DBUS_TYPE_DICT_ENTRY, nullptr, &sub);
+    dbus_message_iter_append_basic(&sub, DBUS_TYPE_STRING, &ask);
+        dbus_message_iter_open_container(&sub, DBUS_TYPE_VARIANT, DBUS_TYPE_BOOLEAN_AS_STRING, &value);
+        dbus_message_iter_append_basic(&value, DBUS_TYPE_BOOLEAN, &bAsk);
+        dbus_message_iter_close_container(&sub, &value);
+    dbus_message_iter_close_container(&pair, &sub);
+
+    dbus_message_iter_close_container(&root, &pair);
+
+    DBusPendingCall* pending;
+    dbus_connection_send_with_reply(connection, message, &pending, -1);
+    dbus_connection_flush(connection);
+    dbus_pending_call_block(pending);
+
+    DBusMessage* reply;
+    reply = dbus_pending_call_steal_reply(pending);
+
+    if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR)
+    {
+        std::cout << dbus_message_get_error_name(reply) << std::endl;
+        return; // TODO: Handle error
+    }
 #endif
 }

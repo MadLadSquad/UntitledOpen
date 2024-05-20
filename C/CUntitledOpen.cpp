@@ -3,7 +3,7 @@
 
 namespace UOpen
 {
-    extern void openURI(const char* link) noexcept;
+    extern void openURI(const char* link, const char* parentWindow) noexcept;
 };
 
 void UOpen_init()
@@ -83,7 +83,7 @@ void UOpen_freePathMultiple(char* path)
     path = nullptr;
 }
 
-void UOpen_openURI(const char* link)
+void UOpen_openURI(const char* link, const char* parentWindow)
 {
-    UOpen::openURI(link);
+    UOpen::openURI(link, parentWindow);
 }
