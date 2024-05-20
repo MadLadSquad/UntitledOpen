@@ -46,9 +46,10 @@ extern "C"
      * @arg link - URI to open
      * @arg parentWindow - Parent window string. Leave as "" if you don't have a parent window or if you're on Windows or macOS X.
      * More info: https://flatpak.github.io/xdg-desktop-portal/docs/window-identifiers.html
+     * @return 0 on success, -1 on error. Use getPickerError to get an error message.
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API void UOpen_openURI(const char* link, const char* parentWindow);
+    UVK_PUBLIC_API int UOpen_openURI(const char* link, const char* parentWindow);
 #ifdef __cplusplus
 }
 #endif

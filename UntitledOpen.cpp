@@ -3,7 +3,6 @@
 #include <nfd.h>
 #include <string>
 #include <cstring>
-#include <iostream>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -57,7 +56,6 @@ std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
             res[0].freeFunc = [](char* d) -> void {
                 if (d != nullptr)
                     NFD_FreePath(d);
-                d = nullptr;
             };
         }
     }
@@ -114,7 +112,6 @@ UOpen::UniqueString::UniqueString(const char* dt) noexcept
     freeFunc = [](char* d) -> void {
         if (d != nullptr)
             NFD_FreePath(d);
-        d = nullptr;
     };
 }
 
@@ -139,7 +136,7 @@ UOpen::UniqueString::operator const char*() const noexcept
     return data;
 }
 
-void UOpen::openURI(const char* link, const char* parentWindow) noexcept
+int UOpen::openURI(const char* link, const char* parentWindow) noexcept
 {
 #ifdef _WIN32
     ShellExecuteA(NULL, NULL, link, NULL, NULL, SW_SHOW);
@@ -155,7 +152,7 @@ void UOpen::openURI(const char* link, const char* parentWindow) noexcept
     dbus_bool_t bAsk = false;
 
     void* data = (void*)link;
-    int fd = 0;
+    int fd;
 
     int linkType = DBUS_TYPE_STRING;
 
@@ -165,7 +162,7 @@ void UOpen::openURI(const char* link, const char* parentWindow) noexcept
         bAsk = true;
 
         fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
-        data = (void*)fd; // TODO: Check if this is how it should be handled
+        data = (void*)((intptr_t)fd); // Convert to intptr_t to silence warning
         linkType = DBUS_TYPE_UNIX_FD;
     }
 
@@ -176,8 +173,9 @@ void UOpen::openURI(const char* link, const char* parentWindow) noexcept
 
     if (dbus_error_is_set(&error))
     {
-        std::cout << error.message << std::endl;
-        return; // TODO: handle error
+        // Print error here for debugging lol
+        dbus_error_free(&error);
+        return -1;
     }
 
     DBusMessage* message = dbus_message_new_method_call("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop", "org.freedesktop.portal.OpenURI", method.c_str());
@@ -220,8 +218,9 @@ void UOpen::openURI(const char* link, const char* parentWindow) noexcept
 
     if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR)
     {
-        std::cout << dbus_message_get_error_name(reply) << std::endl;
-        return; // TODO: Handle error
+        // Print error here for debugging lol
+        return -1;
     }
 #endif
+    return 0;
 }

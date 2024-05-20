@@ -26,7 +26,7 @@ namespace UOpen
 
         UniqueString(const char* dt, FreeTypeFunc func) noexcept;
 
-        FreeTypeFunc freeFunc;
+        FreeTypeFunc freeFunc = [](char*) -> void {};
         char* data = nullptr;
     };
 
@@ -39,9 +39,9 @@ namespace UOpen
         explicit Result(const UOpen_Result& res) noexcept;
 
         std::vector<UniqueString> getPaths() noexcept;
-        UniqueString getPath(size_t i) const noexcept;
+        [[nodiscard]] UniqueString getPath(size_t i) const noexcept;
         size_t getPathNum() noexcept;
-        Status status() const noexcept;
+        [[nodiscard]] Status status() const noexcept;
     private:
         UOpen_Result result{};
     };
@@ -86,7 +86,8 @@ namespace UOpen
      * @arg link - URI to open
      * @arg parentWindow - Parent window string. Leave as "" if you don't have a parent window or if you're on Windows or macOS X.
      * More info: https://flatpak.github.io/xdg-desktop-portal/docs/window-identifiers.html
+     * @return 0 on success, -1 on error. Use getPickerError to get an error message.
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API void openURI(const char* link, const char* parentWindow = "") noexcept;
+    UVK_PUBLIC_API int openURI(const char* link, const char* parentWindow = "") noexcept;
 }
