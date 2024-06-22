@@ -33,10 +33,10 @@ extern "C"
 
     // Returns the number of paths when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API size_t UOpen_getPathCount(UOpen_Result* result);
+    UVK_PUBLIC_API size_t UOpen_getPathCount(const UOpen_Result* result);
     // Returns a path string given an index when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API const char* UOpen_getPathMultiple(UOpen_Result* result, size_t i);
+    UVK_PUBLIC_API const char* UOpen_getPathMultiple(const UOpen_Result* result, size_t i);
     // Frees a path when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
     UVK_PUBLIC_API void UOpen_freePathMultiple(char* path);

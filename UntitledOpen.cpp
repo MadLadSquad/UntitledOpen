@@ -41,8 +41,8 @@ std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
             for (size_t i = 0; i < res.size(); i++)
             {
                 char* pt;
-                auto r = NFD_PathSet_GetPathU8(result.data, i, &pt);
-                if (r == (nfdresult_t)UOPEN_STATUS_SUCCESS)
+                const auto r = NFD_PathSet_GetPathU8(result.data, i, &pt);
+                if (r == static_cast<nfdresult_t>(UOPEN_STATUS_SUCCESS))
                 {
                     res[i].data = pt;
                     res[i].freeFunc = UOpen_freePathMultiple;
@@ -52,7 +52,7 @@ std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
         else
         {
             res.emplace_back();
-            res[0].data = (char*)result.data;
+            res[0].data = static_cast<char*>(result.data);
             res[0].freeFunc = [](char* d) -> void {
                 if (d != nullptr)
                     NFD_FreePath(d);
@@ -62,21 +62,19 @@ std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
     return res;
 }
 
-UOpen::UniqueString UOpen::Result::getPath(size_t i) const noexcept
+UOpen::UniqueString UOpen::Result::getPath(const size_t i) const noexcept
 {
     if (result.data != nullptr && result.status == UOPEN_STATUS_SUCCESS)
     {
         if (result.operation == UOPEN_PICK_MULTIPLE)
         {
             char* pt;
-            auto res = NFD_PathSet_GetPathU8(result.data, i, &pt);
-            if (res == (nfdresult_t)UOPEN_STATUS_SUCCESS)
+            const auto res = NFD_PathSet_GetPathU8(result.data, i, &pt);
+            if (res == static_cast<nfdresult_t>(UOPEN_STATUS_SUCCESS))
                 return {pt, UOpen_freePathMultiple};
-            else
-                return {};
+            return {};
         }
-        else
-            return UniqueString{ (const char*)result.data };
+        return UniqueString{ (const char*)result.data };
     }
     return {};
 }
@@ -91,12 +89,12 @@ size_t UOpen::Result::getPathNum() noexcept
     return UOpen_getPathCount(&result);
 }
 
-UOpen::Result UOpen::pickFile(UOpen::PickerOperation op, const UOpen::Filter* filters, size_t filtersNum, const char* defaultName, const char* defaultPath) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultName, const char* defaultPath) noexcept
 {
     return Result{ UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName) };
 }
 
-UOpen::Result UOpen::pickFile(UOpen::PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath) noexcept
 {
     return Result( UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName) );
 }
@@ -108,16 +106,16 @@ const char* UOpen::getPickerError() noexcept
 
 UOpen::UniqueString::UniqueString(const char* dt) noexcept
 {
-    data = (char*)dt;
+    data = const_cast<char*>(dt);
     freeFunc = [](char* d) -> void {
         if (d != nullptr)
             NFD_FreePath(d);
     };
 }
 
-UOpen::UniqueString::UniqueString(const char* dt, UOpen::UniqueString::FreeTypeFunc func) noexcept
+UOpen::UniqueString::UniqueString(const char* dt, const FreeTypeFunc func) noexcept
 {
-    data = (char*)dt;
+    data = const_cast<char*>(dt);
     freeFunc = func;
 }
 
@@ -141,7 +139,7 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
 #ifdef _WIN32
     ShellExecuteA(NULL, NULL, link, NULL, NULL, SW_SHOW);
 #elif __APPLE__
-    CFURLRef url = CFURLCreateWithBytes(NULL, (UInt8*)link, strlen(link), kCFStringEncodingASCII, NULL);
+    CFURLRef url = CFURLCreateWithBytes(nullptr, (UInt8*)link, (CFIndex)strlen(link), kCFStringEncodingASCII, nullptr);
     LSOpenCFURLRef(url, 0);
     CFRelease(url);
 #else
