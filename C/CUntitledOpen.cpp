@@ -61,7 +61,7 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
     if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation == UOPEN_PICK_MULTIPLE)
-            NFD_PathSet_GetCount(result->data, &count);
+            NFD_PathSet_GetCount(result->data, (nfdpathsetsize_t*)&count);
         else
             count = 1;
     }
