@@ -71,7 +71,7 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
 const char* UOpen_getPathMultiple(const UOpen_Result* result, const size_t i)
 {
     char* res;
-    if (static_cast<UOpen_Status>(NFD_PathSet_GetPath(result->data, i, &res) != UOPEN_STATUS_SUCCESS))
+    if (static_cast<UOpen_Status>(NFD_PathSet_GetPath(result->data, i, &res)) != UOPEN_STATUS_SUCCESS)
         return nullptr;
     return res;
 }
