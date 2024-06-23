@@ -44,6 +44,7 @@ typedef enum UOpen_PickerOperation
     UOPEN_PICK_MULTIPLE,
     UOPEN_PICK_FOLDER,
     UOPEN_SAVE_FILE,
+    UOPEN_PICK_MULTIPLE_FOLDERS,
 } UOpen_PickerOperation;
 
 

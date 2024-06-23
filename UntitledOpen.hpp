@@ -18,7 +18,7 @@ namespace UOpen
 
         operator const char*() const noexcept;
 
-        void destroy() noexcept;
+        void destroy() const noexcept;
         ~UniqueString() noexcept;
     private:
         friend class Result;
@@ -38,9 +38,9 @@ namespace UOpen
         Result() = default;
         explicit Result(const UOpen_Result& res) noexcept;
 
-        std::vector<UniqueString> getPaths() noexcept;
+        std::vector<UniqueString> getPaths() const noexcept;
         [[nodiscard]] UniqueString getPath(size_t i) const noexcept;
-        size_t getPathNum() noexcept;
+        size_t getPathNum() const noexcept;
         [[nodiscard]] Status status() const noexcept;
     private:
         UOpen_Result result{};

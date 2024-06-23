@@ -30,12 +30,12 @@ UOpen::Result::Result(const UOpen_Result& res) noexcept
     result = res;
 }
 
-std::vector<UOpen::UniqueString> UOpen::Result::getPaths() noexcept
+std::vector<UOpen::UniqueString> UOpen::Result::getPaths() const noexcept
 {
     std::vector<UniqueString> res;
     if (result.data != nullptr && result.status == UOPEN_STATUS_SUCCESS)
     {
-        if (result.operation == UOPEN_PICK_MULTIPLE)
+        if (result.operation == UOPEN_PICK_MULTIPLE || result.operation == UOPEN_PICK_MULTIPLE_FOLDERS)
         {
             res.resize(UOpen_getPathCount(&result));
             for (size_t i = 0; i < res.size(); i++)
@@ -84,19 +84,19 @@ UOpen::Status UOpen::Result::status() const noexcept
     return result.status;
 }
 
-size_t UOpen::Result::getPathNum() noexcept
+size_t UOpen::Result::getPathNum() const noexcept
 {
     return UOpen_getPathCount(&result);
 }
 
 UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultName, const char* defaultPath) noexcept
 {
-    return Result{ UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName) };
+    return Result(UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName));
 }
 
 UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath) noexcept
 {
-    return Result( UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName) );
+    return Result(UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName));
 }
 
 const char* UOpen::getPickerError() noexcept
@@ -119,7 +119,7 @@ UOpen::UniqueString::UniqueString(const char* dt, const FreeTypeFunc func) noexc
     freeFunc = func;
 }
 
-void UOpen::UniqueString::destroy() noexcept
+void UOpen::UniqueString::destroy() const noexcept
 {
     freeFunc(data);
 }

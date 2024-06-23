@@ -31,6 +31,9 @@ UOpen_Result UOpen_pickFile(const UOpen_PickerOperation op, const UOpen_Filter* 
         case UOPEN_SAVE_FILE:
             result.status = static_cast<UOpen_Status>(NFD_SaveDialog((char**)&result.data, (const nfdu8filteritem_t*)filters, filtersNum, defaultPath, defaultName));
             break;
+        case UOPEN_PICK_MULTIPLE_FOLDERS:
+            result.status = static_cast<UOpen_Status>(NFD_PickFolderMultiple((const void**)&result.data, defaultPath));
+            break;
         default:
             result.status = static_cast<UOpen_Status>(NFD_OpenDialog((char**)&result.data, (const nfdu8filteritem_t*) filters, filtersNum, defaultPath));
             break;
