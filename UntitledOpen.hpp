@@ -10,7 +10,7 @@ namespace UOpen
 
     // Wrapper class that introduces RAII to strings
     // UntitledImGuiFramework Event Safety - Any time
-    class UVK_PUBLIC_API UniqueString
+    class MLS_PUBLIC_API UniqueString
     {
     public:
         UniqueString() = default;
@@ -32,7 +32,7 @@ namespace UOpen
 
     // Picker result class
     // UntitledImGuiFramework Event Safety - Any time
-    class UVK_PUBLIC_API Result
+    class MLS_PUBLIC_API Result
     {
     public:
         Result() = default;
@@ -48,10 +48,10 @@ namespace UOpen
 
     // Initialise the library. Call this after creating your window
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void init() noexcept;
+    MLS_PUBLIC_API void init() noexcept;
     // Free the library. Call this before closing your window
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void destroy() noexcept;
+    MLS_PUBLIC_API void destroy() noexcept;
 
     /**
      * @brief Picks a file, multiple files, folder or saves a file
@@ -64,7 +64,7 @@ namespace UOpen
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
     /**
      * @brief Picks a file, multiple files, folder or saves a file
      * @param op - File operation enum. Depending on the operation the following parameters may or may not be used
@@ -75,11 +75,11 @@ namespace UOpen
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
 
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API const char* getPickerError() noexcept;
+    MLS_PUBLIC_API const char* getPickerError() noexcept;
 
     /**
      * @brief Opens a URI using the default system application
@@ -89,5 +89,5 @@ namespace UOpen
      * @return 0 on success, -1 on error. Use getPickerError to get an error message.
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API int openURI(const char* link, const char* parentWindow = "") noexcept;
+    MLS_PUBLIC_API int openURI(const char* link, const char* parentWindow = "") noexcept;
 }

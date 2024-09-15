@@ -7,10 +7,10 @@ extern "C"
 #endif
     // Initialise the library. Call this after creating your window
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void UOpen_init();
+    MLS_PUBLIC_API void UOpen_init();
     // Free the library. Call this before closing your window
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void UOpen_destroy();
+    MLS_PUBLIC_API void UOpen_destroy();
 
     /**
      * @brief Picks a file, multiple files, folder or saves a file
@@ -23,23 +23,23 @@ extern "C"
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API UOpen_Result UOpen_pickFile(UOpen_PickerOperation op, const UOpen_Filter* filters, size_t filtersNum, const char* defaultPath, const char* defaultName);
+    MLS_PUBLIC_API UOpen_Result UOpen_pickFile(UOpen_PickerOperation op, const UOpen_Filter* filters, size_t filtersNum, const char* defaultPath, const char* defaultName);
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API const char* UOpen_getPickerError();
+    MLS_PUBLIC_API const char* UOpen_getPickerError();
     // Frees the result struct
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void UOpen_freeResult(UOpen_Result* result);
+    MLS_PUBLIC_API void UOpen_freeResult(UOpen_Result* result);
 
     // Returns the number of paths when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API size_t UOpen_getPathCount(const UOpen_Result* result);
+    MLS_PUBLIC_API size_t UOpen_getPathCount(const UOpen_Result* result);
     // Returns a path string given an index when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API const char* UOpen_getPathMultiple(const UOpen_Result* result, size_t i);
+    MLS_PUBLIC_API const char* UOpen_getPathMultiple(const UOpen_Result* result, size_t i);
     // Frees a path when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
-    UVK_PUBLIC_API void UOpen_freePathMultiple(char* path);
+    MLS_PUBLIC_API void UOpen_freePathMultiple(char* path);
 
     /**
      * @brief Opens a URI using the default system application
@@ -49,7 +49,7 @@ extern "C"
      * @return 0 on success, -1 on error. Use getPickerError to get an error message.
      * @note Event Safety - begin, style, post-begin
      */
-    UVK_PUBLIC_API int UOpen_openURI(const char* link, const char* parentWindow);
+    MLS_PUBLIC_API int UOpen_openURI(const char* link, const char* parentWindow);
 #ifdef __cplusplus
 }
 #endif

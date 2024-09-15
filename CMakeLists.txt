@@ -21,7 +21,7 @@ endif()
 
 add_library(UntitledOpen ${UOPEN_LIBRARY_TYPE} C/CUntitledOpen.cpp C/CUntitledOpen.h Common.h UntitledOpen.cpp UntitledOpen.hpp)
 
-target_compile_definitions(UntitledOpen PRIVATE UVK_LOG_EXPORT_FROM_LIBRARY UVK_LIB_COMPILE)
+target_compile_definitions(UntitledOpen PRIVATE MLS_EXPORT_LIBRARY MLS_LIB_COMPILE)
 target_compile_definitions(UntitledOpen PUBLIC UIMGUI_OPEN_SUBMODULE_ENABLED)
 list(APPEND compile_defs "UIMGUI_OPEN_SUBMODULE_ENABLED")
 

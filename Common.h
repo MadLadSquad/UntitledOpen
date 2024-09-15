@@ -1,21 +1,17 @@
 #pragma once
 
-#ifdef UVK_LOG_EXPORT_FROM_LIBRARY
+#ifdef MLS_EXPORT_LIBRARY
     #ifdef _WIN32
-        #ifdef UVK_LIB_COMPILE
-            #define UVK_PUBLIC_API __declspec(dllexport)
-            #define UVK_PUBLIC_TMPL_API __declspec(dllexport)
+        #ifdef MLS_LIB_COMPILE
+            #define MLS_PUBLIC_API __declspec(dllexport)
         #else
-            #define UVK_PUBLIC_API __declspec(dllimport)
-            #define UVK_PUBLIC_TMPL_API
+            #define MLS_PUBLIC_API __declspec(dllimport)
         #endif
     #else
-        #define UVK_PUBLIC_API
-        #define UVK_PUBLIC_TMPL_API
+        #define MLS_PUBLIC_API
     #endif
 #else
-    #define UVK_PUBLIC_API
-    #define UVK_PUBLIC_TMPL_API
+    #define MLS_PUBLIC_API
 #endif
 
 #include <stddef.h>
@@ -25,7 +21,7 @@ extern "C"
 {
 #endif
 
-typedef struct UVK_PUBLIC_API UOpen_Filter
+typedef struct MLS_PUBLIC_API UOpen_Filter
 {
     const char* name;
     const char* spec;
@@ -48,7 +44,7 @@ typedef enum UOpen_PickerOperation
 } UOpen_PickerOperation;
 
 
-typedef struct UVK_PUBLIC_API UOpen_Result
+typedef struct MLS_PUBLIC_API UOpen_Result
 {
     UOpen_Status status;
     UOpen_PickerOperation operation;
