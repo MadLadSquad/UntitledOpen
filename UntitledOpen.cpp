@@ -74,7 +74,7 @@ UOpen::UniqueString UOpen::Result::getPath(const size_t i) const noexcept
                 return {pt, UOpen_freePathMultiple};
             return {};
         }
-        return UniqueString{ (const char*)result.data };
+        return UniqueString{ static_cast<const char*>(result.data) };
     }
     return {};
 }
@@ -143,14 +143,13 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     LSOpenCFURLRef(url, 0);
     CFRelease(url);
 #else
-    std::string links = link;
+    const std::string links = link;
     std::string method = "OpenURI";
 
-    dbus_bool_t bWritable = true;
+    constexpr dbus_bool_t bWritable = true;
     dbus_bool_t bAsk = false;
 
-    void* data = (void*)link;
-    int fd;
+    auto data = (void*)link;
 
     int linkType = DBUS_TYPE_STRING;
 
@@ -159,7 +158,7 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
         method = "OpenFile";
         bAsk = true;
 
-        fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
+        int fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
         data = (void*)((intptr_t)fd); // Convert to intptr_t to silence warning
         linkType = DBUS_TYPE_UNIX_FD;
     }
@@ -184,8 +183,8 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     DBusMessageIter sub;
     DBusMessageIter value;
 
-    static constexpr const char* writable = "writable";
-    static constexpr const char* ask = "ask";
+    static constexpr auto writable = "writable";
+    static constexpr auto ask = "ask";
 
     dbus_message_iter_init_append(message, &root);
     dbus_message_iter_open_container(&root, DBUS_TYPE_ARRAY, "{sv}", &pair);
@@ -211,8 +210,7 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     dbus_connection_flush(connection);
     dbus_pending_call_block(pending);
 
-    DBusMessage* reply;
-    reply = dbus_pending_call_steal_reply(pending);
+    DBusMessage* reply = dbus_pending_call_steal_reply(pending);
 
     if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR)
     {
