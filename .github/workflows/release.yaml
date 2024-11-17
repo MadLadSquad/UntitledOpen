@@ -38,7 +38,7 @@ jobs:
           git config --global user.email "contact@madladsquad.com"
           git fetch --all
           git submodule update --remote --merge --init --recursive
-          ver="${{ github_ref_name }}"
+          ver="${{ github.ref_name }}"
           sed -i "s/project(UntitledOpen.*/project(UntitledOpen VERSION ${ver:1})/g" CMakeLists.txt
           git add . && git commit -m "Automatically bump version" && git push origin HEAD:master
       - name: Create archive
