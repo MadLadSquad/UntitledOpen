@@ -11,7 +11,7 @@ set(UOPEN_LIBRARY_TYPE "SHARED")
 if (BUILD_VARIANT_STATIC)
     set(UOPEN_LIBRARY_TYPE "STATIC")
 endif()
-add_subdirectory(NFD)
+add_subdirectory(NFD/)
 
 if (NOT WIN32 AND NOT APPLE)
     find_package(PkgConfig REQUIRED)
