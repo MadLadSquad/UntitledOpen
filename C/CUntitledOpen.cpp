@@ -50,10 +50,10 @@ void UOpen_freeResult(UOpen_Result* result)
 {
     if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
-        if (result->operation != UOPEN_PICK_MULTIPLE)
-            NFD_FreePath(static_cast<char*>(result->data));
-        else
+        if (result->operation == UOPEN_PICK_MULTIPLE || result->operation == UOPEN_PICK_MULTIPLE_FOLDERS)
             NFD_PathSet_Free(result->data);
+        else
+            NFD_FreePath(static_cast<char*>(result->data));
         result->data = nullptr;
     }
 }
@@ -63,7 +63,7 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
     size_t count = 0;
     if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
-        if (result->operation == UOPEN_PICK_MULTIPLE)
+        if (result->operation == UOPEN_PICK_MULTIPLE || result->operation == UOPEN_PICK_MULTIPLE_FOLDERS)
             NFD_PathSet_GetCount(result->data, (nfdpathsetsize_t*)&count);
         else
             count = 1;

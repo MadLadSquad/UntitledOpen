@@ -66,7 +66,7 @@ UOpen::UniqueString UOpen::Result::getPath(const size_t i) const noexcept
 {
     if (result.data != nullptr && result.status == UOPEN_STATUS_SUCCESS)
     {
-        if (result.operation == UOPEN_PICK_MULTIPLE)
+        if (result.operation == UOPEN_PICK_MULTIPLE || result.operation == UOPEN_PICK_MULTIPLE_FOLDERS)
         {
             char* pt;
             const auto res = NFD_PathSet_GetPathU8(result.data, i, &pt);
