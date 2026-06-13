@@ -37,7 +37,6 @@ jobs:
           git config --global user.name "Madman10K"
           git config --global user.email "contact@madladsquad.com"
           git fetch --all
-          git submodule update --remote --merge --init --recursive
           ver="${{ github.ref_name }}"
           echo "out=untitled-open-${ver:1}" >> $GITHUB_OUTPUT
           sed -i "s/project(UntitledOpen.*/project(UntitledOpen VERSION ${ver:1})/g" CMakeLists.txt
