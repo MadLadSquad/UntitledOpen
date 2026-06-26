@@ -1,6 +1,8 @@
 #include "CUntitledOpen.h"
 #include <nfd.h>
 
+#include "UntitledOpen.hpp"
+
 namespace UOpen
 {
     extern int openURI(const char* link, const char* parentWindow) noexcept;
@@ -9,7 +11,7 @@ namespace UOpen
 void UOpen_init(void* waylandDisplay)
 {
     NFD_Init();
-    NFD_SetWaylandDisplay(static_cast<wl_display*>(waylandDisplay));
+    UOpen_updateWaylandDisplay(waylandDisplay);
 }
 
 void UOpen_destroy()
@@ -177,5 +179,7 @@ int UOpen_openURI(const char* link, const char* parentWindow)
 
 void UOpen_updateWaylandDisplay(void* display)
 {
+#if !defined(__APPLE__) && !defined(_WIN32)
     NFD_SetWaylandDisplay(static_cast<wl_display*>(display));
+#endif
 }
