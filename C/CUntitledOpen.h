@@ -6,8 +6,9 @@ extern "C"
 {
 #endif
     // Initialise the library. Call this after creating your window
+    // Set waylandDisplay to a non-null value to set the display on Wayland. Defaults to nullptr
     // Event Safety - begin, style, post-begin
-    MLS_PUBLIC_API void UOpen_init();
+    MLS_PUBLIC_API void UOpen_init(void* waylandDisplay);
     // Free the library. Call this before closing your window
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API void UOpen_destroy();
@@ -20,10 +21,25 @@ extern "C"
      * @param filtersNum - Number of filters in the filters array
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
      * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
+     * @param title - The picker window's title
+     * @param acceptLabel - The accept button's label. Leave as "" for the default label
+     * @param cancelLabel - The cancel button's label. Leave as "" for the default label
+     * @param windowHandlePlatform - The backend window platform that your window(if any) and the picker's window run on. Used together with windowHandle to set the parent window for the picker window. Set to NONE by default
+     * @param windowHandle - The backend window handle for your window that will be used to parent the picker's window to your window if using a platform type that is not NONE. Set to nullptr by default
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    MLS_PUBLIC_API UOpen_Result UOpen_pickFile(UOpen_PickerOperation op, const UOpen_Filter* filters, size_t filtersNum, const char* defaultPath, const char* defaultName);
+    MLS_PUBLIC_API UOpen_Result UOpen_pickFile(
+        UOpen_PickerOperation op,
+        const UOpen_Filter* filters, size_t filtersNum,
+        const char* defaultPath,
+        const char* defaultName,
+        const char* title,
+        const char* acceptLabel,
+        const char* cancelLabel,
+        UOpen_WindowHandlePlatform windowHandlePlatform, void* windowHandle
+    );
+
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API const char* UOpen_getPickerError();
@@ -40,6 +56,10 @@ extern "C"
     // Frees a path when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API void UOpen_freePathMultiple(char* path);
+
+    // Updates the Wayland display. Set to nullptr to reset the display
+    // Event Safety - begin, style, post-begin
+    MLS_PUBLIC_API void UOpen_updateWaylandDisplay(void* display);
 
     /**
      * @brief Opens a URI using the default system application

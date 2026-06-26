@@ -6,9 +6,10 @@ namespace UOpen
     extern int openURI(const char* link, const char* parentWindow) noexcept;
 };
 
-void UOpen_init()
+void UOpen_init(void* waylandDisplay)
 {
     NFD_Init();
+    NFD_SetWaylandDisplay(static_cast<wl_display*>(waylandDisplay));
 }
 
 void UOpen_destroy()
@@ -16,26 +17,110 @@ void UOpen_destroy()
     NFD_Quit();
 }
 
-UOpen_Result UOpen_pickFile(const UOpen_PickerOperation op, const UOpen_Filter* filters, const size_t filtersNum, const char* defaultPath, const char* defaultName)
+UOpen_Result UOpen_pickFile(const UOpen_PickerOperation op, const UOpen_Filter* filters, const size_t filtersNum, const char* defaultPath, const char* defaultName, const char* title, const char* acceptLabel, const char* cancelLabel, UOpen_WindowHandlePlatform windowHandlePlatform, void* windowHandle)
 {
     UOpen_Result result = { .operation = op, .data = nullptr };
 
     switch (op)
     {
         case UOPEN_PICK_MULTIPLE:
-            result.status = static_cast<UOpen_Status>(NFD_OpenDialogMultiple((const void**)&result.data, (const nfdu8filteritem_t*)filters, filtersNum, defaultPath));
+            {
+                const nfdopendialogu8args_t args{
+                    .filterList = reinterpret_cast<const nfdu8filteritem_t*>(filters),
+                    .filterCount = static_cast<nfdfiltersize_t>(filtersNum),
+                    .defaultPath = defaultPath,
+                    .parentWindow =
+                    {
+                        .type = static_cast<size_t>(windowHandlePlatform),
+                        .handle = windowHandle,
+                    },
+                    .title = title,
+                    .acceptLabel = acceptLabel,
+                    .cancelLabel = cancelLabel,
+                };
+                result.status = static_cast<UOpen_Status>(
+                    NFD_OpenDialogMultipleU8_With(const_cast<const void**>(&result.data), &args)
+                );
+            }
             break;
         case UOPEN_PICK_FOLDER:
-            result.status = static_cast<UOpen_Status>(NFD_PickFolder((char**)&result.data, defaultPath));
+            {
+                const nfdpickfolderu8args_t args{
+                    .defaultPath = defaultPath,
+                    .parentWindow =
+                    {
+                        .type = static_cast<size_t>(windowHandlePlatform),
+                        .handle = windowHandle,
+                    },
+                    .title = title,
+                    .acceptLabel = acceptLabel,
+                    .cancelLabel = cancelLabel,
+                };
+                result.status = static_cast<UOpen_Status>(
+                    NFD_PickFolderU8_With(reinterpret_cast<char**>(&result.data), &args)
+                );
+            }
             break;
         case UOPEN_SAVE_FILE:
-            result.status = static_cast<UOpen_Status>(NFD_SaveDialog((char**)&result.data, (const nfdu8filteritem_t*)filters, filtersNum, defaultPath, defaultName));
+            {
+                const nfdsavedialogu8args_t args{
+                    .filterList = reinterpret_cast<const nfdu8filteritem_t*>(filters),
+                    .filterCount = static_cast<nfdfiltersize_t>(filtersNum),
+                    .defaultPath = defaultPath,
+                    .defaultName = defaultName,
+                    .parentWindow =
+                    {
+                        .type = static_cast<size_t>(windowHandlePlatform),
+                        .handle = windowHandle,
+                    },
+                    .title = title,
+                    .acceptLabel = acceptLabel,
+                    .cancelLabel = cancelLabel,
+                };
+                result.status = static_cast<UOpen_Status>(
+                    NFD_SaveDialogU8_With(reinterpret_cast<char**>(&result.data), &args)
+                );
+            }
             break;
         case UOPEN_PICK_MULTIPLE_FOLDERS:
-            result.status = static_cast<UOpen_Status>(NFD_PickFolderMultiple((const void**)&result.data, defaultPath));
+            {
+                const nfdpickfolderu8args_t args{
+                    .defaultPath = defaultPath,
+                    .parentWindow =
+                    {
+                        .type = static_cast<size_t>(windowHandlePlatform),
+                        .handle = windowHandle,
+                    },
+                    .title = title,
+                    .acceptLabel = acceptLabel,
+                    .cancelLabel = cancelLabel,
+                };
+
+                result.status = static_cast<UOpen_Status>(
+                    NFD_PickFolderMultipleU8_With(const_cast<const void**>(&result.data), &args)
+                );
+            }
             break;
         default:
-            result.status = static_cast<UOpen_Status>(NFD_OpenDialog((char**)&result.data, (const nfdu8filteritem_t*) filters, filtersNum, defaultPath));
+            {
+                const nfdopendialogu8args_t args{
+                    .filterList = reinterpret_cast<const nfdu8filteritem_t*>(filters),
+                    .filterCount = static_cast<nfdfiltersize_t>(filtersNum),
+                    .defaultPath = defaultPath,
+                    .parentWindow =
+                    {
+                        .type = static_cast<size_t>(windowHandlePlatform),
+                        .handle = windowHandle,
+                    },
+                    .title = title,
+                    .acceptLabel = acceptLabel,
+                    .cancelLabel = cancelLabel,
+                };
+
+                result.status = static_cast<UOpen_Status>(
+                    NFD_OpenDialogU8_With(reinterpret_cast<char**>(&result.data), &args)
+                );
+            }
             break;
     }
     return result;
@@ -64,7 +149,7 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
     if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation == UOPEN_PICK_MULTIPLE || result->operation == UOPEN_PICK_MULTIPLE_FOLDERS)
-            NFD_PathSet_GetCount(result->data, (nfdpathsetsize_t*)&count);
+            NFD_PathSet_GetCount(result->data, reinterpret_cast<nfdpathsetsize_t*>(&count));
         else
             count = 1;
     }
@@ -88,4 +173,9 @@ void UOpen_freePathMultiple(char* path)
 int UOpen_openURI(const char* link, const char* parentWindow)
 {
     return UOpen::openURI(link, parentWindow);
+}
+
+void UOpen_updateWaylandDisplay(void* display)
+{
+    NFD_SetWaylandDisplay(static_cast<wl_display*>(display));
 }

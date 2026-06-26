@@ -15,14 +15,19 @@
     #include <fcntl.h>
 #endif
 
-void UOpen::init() noexcept
+void UOpen::init(void* waylandDisplay) noexcept
 {
-    UOpen_init();
+    UOpen_init(waylandDisplay);
 }
 
 void UOpen::destroy() noexcept
 {
     UOpen_destroy();
+}
+
+void UOpen::updateWaylandDisplay(void* display)
+{
+    UOpen_updateWaylandDisplay(display);
 }
 
 UOpen::Result::Result(const UOpen_Result& res) noexcept
@@ -89,14 +94,14 @@ size_t UOpen::Result::getPathNum() const noexcept
     return UOpen_getPathCount(&result);
 }
 
-UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultName, const char* defaultPath) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultName, const char* defaultPath, const char* title, const char* acceptLabel, const char* cancelLabel, WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
 {
-    return Result(UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName));
+    return Result(UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName, title, acceptLabel, cancelLabel, windowHandlePlatform, windowHandle));
 }
 
-UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath, const char* title, const char* acceptLabel, const char* cancelLabel, WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
 {
-    return Result(UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName));
+    return Result(UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName, title, acceptLabel, cancelLabel, windowHandlePlatform, windowHandle));
 }
 
 const char* UOpen::getPickerError() noexcept
@@ -149,7 +154,7 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     constexpr dbus_bool_t bWritable = true;
     dbus_bool_t bAsk = false;
 
-    auto data = (void*)link;
+    auto data = const_cast<void*>(reinterpret_cast<const void*>(link));
 
     int linkType = DBUS_TYPE_STRING;
 
@@ -158,8 +163,8 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
         method = "OpenFile";
         bAsk = true;
 
-        int fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
-        data = (void*)((intptr_t)fd); // Convert to intptr_t to silence warning
+        const int fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
+        data = reinterpret_cast<void*>(static_cast<intptr_t>(fd)); // Convert to intptr_t to silence warning
         linkType = DBUS_TYPE_UNIX_FD;
     }
 
@@ -210,13 +215,8 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     dbus_connection_flush(connection);
     dbus_pending_call_block(pending);
 
-    DBusMessage* reply = dbus_pending_call_steal_reply(pending);
-
-    if (dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR)
-    {
-        // Print error here for debugging lol
+    if (dbus_message_get_type(dbus_pending_call_steal_reply(pending)) == DBUS_MESSAGE_TYPE_ERROR)
         return -1;
-    }
 #endif
     return 0;
 }

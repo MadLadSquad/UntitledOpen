@@ -44,6 +44,15 @@ typedef enum UOpen_PickerOperation
     UOPEN_PICK_MULTIPLE_FOLDERS,
 } UOpen_PickerOperation;
 
+typedef enum UOpen_WindowHandlePlatform
+{
+    UOPEN_WINDOW_HANDLE_PLATFORM_NONE    = 0,
+    UOPEN_WINDOW_HANDLE_PLATFORM_WIN32   = 1,
+    UOPEN_WINDOW_HANDLE_PLATFORM_COCOA   = 2,
+    UOPEN_WINDOW_HANDLE_PLATFORM_X11     = 3,
+    UOPEN_WINDOW_HANDLE_PLATFORM_WAYLAND = 4
+} UOpen_WindowHandlePlatform;
+
 
 typedef struct MLS_PUBLIC_API UOpen_Result
 {

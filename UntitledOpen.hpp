@@ -7,6 +7,7 @@ namespace UOpen
     typedef UOpen_Status Status;
     typedef UOpen_Filter Filter;
     typedef UOpen_PickerOperation PickerOperation;
+    typedef UOpen_WindowHandlePlatform WindowHandlePlatform;
 
     // Wrapper class that introduces RAII to strings
     // UntitledImGuiFramework Event Safety - Any time
@@ -38,20 +39,25 @@ namespace UOpen
         Result() = default;
         explicit Result(const UOpen_Result& res) noexcept;
 
-        std::vector<UniqueString> getPaths() const noexcept;
+        [[nodiscard]] std::vector<UniqueString> getPaths() const noexcept;
         [[nodiscard]] UniqueString getPath(size_t i) const noexcept;
-        size_t getPathNum() const noexcept;
+        [[nodiscard]] size_t getPathNum() const noexcept;
         [[nodiscard]] Status status() const noexcept;
     private:
         UOpen_Result result{};
     };
 
-    // Initialise the library. Call this after creating your window
+    // Initialise the library. Call this after creating your window.
+    // Set waylandDisplay to a non-null value to set the display on Wayland
     // Event Safety - begin, style, post-begin
-    MLS_PUBLIC_API void init() noexcept;
+    MLS_PUBLIC_API void init(void* waylandDisplay = nullptr) noexcept;
     // Free the library. Call this before closing your window
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API void destroy() noexcept;
+
+    // Updates the Wayland display. Set to nullptr to reset the display
+    // Event Safety - begin, style, post-begin
+    MLS_PUBLIC_API void updateWaylandDisplay(void* display);
 
     /**
      * @brief Picks a file, multiple files, folder or saves a file
@@ -61,10 +67,15 @@ namespace UOpen
      * @param filtersNum - Number of filters in the filters array
      * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
+     * @param title - The picker window's title
+     * @param acceptLabel - The accept button's label. Leave as "" for the default label
+     * @param cancelLabel - The cancel button's label. Leave as "" for the default label
+     * @param windowHandlePlatform - The backend window platform that your window(if any) and the picker's window run on. Used together with windowHandle to set the parent window for the picker window. Set to NONE by default
+     * @param windowHandle - The backend window handle for your window that will be used to parent the picker's window to your window if using a platform type that is not NONE. Set to nullptr by default
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    MLS_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultName = "", const char* defaultPath = nullptr, const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
     /**
      * @brief Picks a file, multiple files, folder or saves a file
      * @param op - File operation enum. Depending on the operation the following parameters may or may not be used
@@ -72,10 +83,15 @@ namespace UOpen
      * This value is ignored when the file operation is UOPEN_PICK_FOLDER
      * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
+     * @param title - The picker window's title
+     * @param acceptLabel - The accept button's label. Leave as "" for the default label
+     * @param cancelLabel - The cancel button's label. Leave as "" for the default label
+     * @param windowHandlePlatform - The backend window platform that your window(if any) and the picker's window run on. Used together with windowHandle to set the parent window for the picker window. Set to NONE by default
+     * @param windowHandle - The backend window handle for your window that will be used to parent the picker's window to your window if using a platform type that is not NONE. Set to nullptr by default
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    MLS_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultName = "", const char* defaultPath = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultName = "", const char* defaultPath = nullptr, const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
 
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin
