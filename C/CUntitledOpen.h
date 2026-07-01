@@ -20,7 +20,7 @@ extern "C"
      * This value is ignored when the file operation is UOPEN_PICK_FOLDER
      * @param filtersNum - Number of filters in the filters array
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
-     * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
+     * @param defaultName - Default file name. Only used when saving a file. Can be left as ""
      * @param title - The picker window's title
      * @param acceptLabel - The accept button's label. Leave as "" for the default label
      * @param cancelLabel - The cancel button's label. Leave as "" for the default label

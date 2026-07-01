@@ -94,12 +94,12 @@ size_t UOpen::Result::getPathNum() const noexcept
     return UOpen_getPathCount(&result);
 }
 
-UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultName, const char* defaultPath, const char* title, const char* acceptLabel, const char* cancelLabel, WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const Filter* filters, const size_t filtersNum, const char* defaultPath, const char* defaultName, const char* title, const char* acceptLabel, const char* cancelLabel, const WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
 {
     return Result(UOpen_pickFile(op, filters, filtersNum, defaultPath, defaultName, title, acceptLabel, cancelLabel, windowHandlePlatform, windowHandle));
 }
 
-UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultName, const char* defaultPath, const char* title, const char* acceptLabel, const char* cancelLabel, WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
+UOpen::Result UOpen::pickFile(const PickerOperation op, const std::vector<Filter>& filters, const char* defaultPath, const char* defaultName, const char* title, const char* acceptLabel, const char* cancelLabel, const WindowHandlePlatform windowHandlePlatform, void* windowHandle) noexcept
 {
     return Result(UOpen_pickFile(op, filters.data(), filters.size(), defaultPath, defaultName, title, acceptLabel, cancelLabel, windowHandlePlatform, windowHandle));
 }
@@ -122,6 +122,27 @@ UOpen::UniqueString::UniqueString(const char* dt, const FreeTypeFunc func) noexc
 {
     data = const_cast<char*>(dt);
     freeFunc = func;
+}
+
+UOpen::UniqueString::UniqueString(UniqueString&& other) noexcept
+{
+    data = other.data;
+    freeFunc = other.freeFunc;
+    other.data = nullptr;
+    other.freeFunc = [](char*) -> void {};
+}
+
+UOpen::UniqueString& UOpen::UniqueString::operator=(UniqueString&& other) noexcept
+{
+    if (this != &other)
+    {
+        destroy();
+        data = other.data;
+        freeFunc = other.freeFunc;
+        other.data = nullptr;
+        other.freeFunc = [](char*) -> void {};
+    }
+    return *this;
 }
 
 void UOpen::UniqueString::destroy() const noexcept

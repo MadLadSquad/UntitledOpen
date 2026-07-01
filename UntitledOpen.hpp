@@ -17,6 +17,13 @@ namespace UOpen
         UniqueString() = default;
         explicit UniqueString(const char* dt) noexcept;
 
+        // Move-only: the wrapper uniquely owns its NFD-allocated string, so copying
+        // would free the same pointer twice. Ownership transfers on move instead.
+        UniqueString(const UniqueString&) = delete;
+        UniqueString& operator=(const UniqueString&) = delete;
+        UniqueString(UniqueString&& other) noexcept;
+        UniqueString& operator=(UniqueString&& other) noexcept;
+
         operator const char*() const noexcept;
 
         void destroy() const noexcept;
@@ -65,8 +72,8 @@ namespace UOpen
      * @param filters - File filters. Example filters value: { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
      * This value is ignored when the file operation is UOPEN_PICK_FOLDER
      * @param filtersNum - Number of filters in the filters array
-     * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
+     * @param defaultName - Default file name. Only used when saving a file. Can be left as ""
      * @param title - The picker window's title
      * @param acceptLabel - The accept button's label. Leave as "" for the default label
      * @param cancelLabel - The cancel button's label. Leave as "" for the default label
@@ -75,14 +82,14 @@ namespace UOpen
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    MLS_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultName = "", const char* defaultPath = nullptr, const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const Filter* filters, size_t filtersNum, const char* defaultPath = nullptr, const char* defaultName = "", const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
     /**
      * @brief Picks a file, multiple files, folder or saves a file
      * @param op - File operation enum. Depending on the operation the following parameters may or may not be used
      * @param filters - File filters. Example filters value: { { "Source code", "c,cpp,cc" }, { "Headers", "h,hpp" } };
      * This value is ignored when the file operation is UOPEN_PICK_FOLDER
-     * @param defaultName - Default name for a folder name. Only used when creating folders. Can be left as ""
      * @param defaultPath - Default path for the dialog. Mostly ignored, for example on Linux. Can be left as NULL
+     * @param defaultName - Default file name. Only used when saving a file. Can be left as ""
      * @param title - The picker window's title
      * @param acceptLabel - The accept button's label. Leave as "" for the default label
      * @param cancelLabel - The cancel button's label. Leave as "" for the default label
@@ -91,7 +98,7 @@ namespace UOpen
      * @return File pick result struct. Use this to get the strings. Has to be freed with UOpen_freeResult
      * @note Event Safety - begin, style, post-begin
      */
-    MLS_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultName = "", const char* defaultPath = nullptr, const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
+    MLS_PUBLIC_API Result pickFile(PickerOperation op, const std::vector<Filter>& filters, const char* defaultPath = nullptr, const char* defaultName = "", const char* title = "", const char* acceptLabel = "", const char* cancelLabel = "", WindowHandlePlatform windowHandlePlatform = UOPEN_WINDOW_HANDLE_PLATFORM_NONE, void* windowHandle = nullptr) noexcept;
 
     // Returns an error string if the returned status is UOPEN_STATUS_ERROR
     // Event Safety - begin, style, post-begin

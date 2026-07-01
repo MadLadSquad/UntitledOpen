@@ -1,12 +1,6 @@
 #include "CUntitledOpen.h"
 #include <nfd.h>
-
 #include "UntitledOpen.hpp"
-
-namespace UOpen
-{
-    extern int openURI(const char* link, const char* parentWindow) noexcept;
-};
 
 void UOpen_init(void* waylandDisplay)
 {
@@ -19,7 +13,7 @@ void UOpen_destroy()
     NFD_Quit();
 }
 
-UOpen_Result UOpen_pickFile(const UOpen_PickerOperation op, const UOpen_Filter* filters, const size_t filtersNum, const char* defaultPath, const char* defaultName, const char* title, const char* acceptLabel, const char* cancelLabel, UOpen_WindowHandlePlatform windowHandlePlatform, void* windowHandle)
+UOpen_Result UOpen_pickFile(const UOpen_PickerOperation op, const UOpen_Filter* filters, const size_t filtersNum, const char* defaultPath, const char* defaultName, const char* title, const char* acceptLabel, const char* cancelLabel, const UOpen_WindowHandlePlatform windowHandlePlatform, void* windowHandle)
 {
     UOpen_Result result = { .operation = op, .data = nullptr };
 
@@ -161,7 +155,7 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
 const char* UOpen_getPathMultiple(const UOpen_Result* result, const size_t i)
 {
     char* res;
-    if (static_cast<UOpen_Status>(NFD_PathSet_GetPath(result->data, i, &res)) != UOPEN_STATUS_SUCCESS)
+    if (static_cast<UOpen_Status>(NFD_PathSet_GetPathU8(result->data, i, &res)) != UOPEN_STATUS_SUCCESS)
         return nullptr;
     return res;
 }
