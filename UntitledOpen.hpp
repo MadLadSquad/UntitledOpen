@@ -109,7 +109,7 @@ namespace UOpen
      * @arg link - URI to open
      * @arg parentWindow - Parent window string. Leave as "" if you don't have a parent window or if you're on Windows or macOS X.
      * More info: https://flatpak.github.io/xdg-desktop-portal/docs/window-identifiers.html
-     * @return 0 on success, -1 on error. Use getPickerError to get an error message.
+     * @return 0 on success, -1 on error
      * @note Event Safety - begin, style, post-begin
      */
     MLS_PUBLIC_API int openURI(const char* link, const char* parentWindow = "") noexcept;

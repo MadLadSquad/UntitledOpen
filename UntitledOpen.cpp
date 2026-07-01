@@ -13,6 +13,7 @@
 #else
     #include <dbus/dbus.h>
     #include <fcntl.h>
+    #include <unistd.h>
 #endif
 
 void UOpen::init(void* waylandDisplay) noexcept
@@ -178,14 +179,18 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     auto data = const_cast<void*>(reinterpret_cast<const void*>(link));
 
     int linkType = DBUS_TYPE_STRING;
+    int fileFd = -1;
 
     if (links.starts_with("file://"))
     {
         method = "OpenFile";
         bAsk = true;
 
-        const int fd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
-        data = reinterpret_cast<void*>(static_cast<intptr_t>(fd)); // Convert to intptr_t to silence warning
+        fileFd = open(links.substr(strlen("file://")).c_str(), O_RDWR);
+        if (fileFd < 0)
+            return -1;
+
+        data = reinterpret_cast<void*>(static_cast<intptr_t>(fileFd)); // Convert to intptr_t to silence warning
         linkType = DBUS_TYPE_UNIX_FD;
     }
 
@@ -198,10 +203,19 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
     {
         // Print error here for debugging lol
         dbus_error_free(&error);
+        if (fileFd >= 0)
+            close(fileFd);
         return -1;
     }
 
     DBusMessage* message = dbus_message_new_method_call("org.freedesktop.portal.Desktop", "/org/freedesktop/portal/desktop", "org.freedesktop.portal.OpenURI", method.c_str());
+    if (message == nullptr)
+    {
+        if (fileFd >= 0)
+            close(fileFd);
+        return -1;
+    }
+
     dbus_message_append_args(message, DBUS_TYPE_STRING, &parentWindow, linkType, &data, DBUS_TYPE_INVALID);
 
     DBusMessageIter root;
@@ -231,12 +245,29 @@ int UOpen::openURI(const char* link, const char* parentWindow) noexcept
 
     dbus_message_iter_close_container(&root, &pair);
 
-    DBusPendingCall* pending;
-    dbus_connection_send_with_reply(connection, message, &pending, -1);
+    DBusPendingCall* pending = nullptr;
+    const dbus_bool_t bSent = dbus_connection_send_with_reply(connection, message, &pending, -1);
+
+    // The message(with its own duped fd) is now owned by the connection's outgoing queue,
+    // so we can drop our references regardless of whether the send succeeded.
+    dbus_message_unref(message);
+    if (fileFd >= 0)
+        close(fileFd);
+
+    if (!bSent || pending == nullptr)
+        return -1;
+
     dbus_connection_flush(connection);
     dbus_pending_call_block(pending);
 
-    if (dbus_message_get_type(dbus_pending_call_steal_reply(pending)) == DBUS_MESSAGE_TYPE_ERROR)
+    DBusMessage* reply = dbus_pending_call_steal_reply(pending);
+    dbus_pending_call_unref(pending);
+
+    const bool bError = reply == nullptr || dbus_message_get_type(reply) == DBUS_MESSAGE_TYPE_ERROR;
+    if (reply != nullptr)
+        dbus_message_unref(reply);
+
+    if (bError)
         return -1;
 #endif
     return 0;
