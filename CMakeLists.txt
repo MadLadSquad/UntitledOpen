@@ -5,6 +5,9 @@ project(UntitledOpen VERSION 3.0.0.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD 99)
 
+# Resolves the platform's real library directory instead of assuming lib64, which is wrong on Debian and Arch
+include(GNUInstallDirs)
+
 include_directories(. NFD/src/include/)
 
 set(UOPEN_LIBRARY_TYPE "SHARED")
@@ -37,10 +40,11 @@ configure_file(UntitledOpen.pc.in UntitledOpen.pc @ONLY)
 
 if (UIMGUI_INSTALL)
     install(TARGETS UntitledOpen
-            LIBRARY DESTINATION lib64/
-            ARCHIVE DESTINATION lib64/)
-    install(FILES UntitledOpen.hpp Common.h DESTINATION include/UntitledOpen)
-    install(FILES C/CUntitledOpen.h DESTINATION include/UntitledOpen/C)
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(FILES UntitledOpen.hpp Common.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/UntitledOpen)
+    install(FILES C/CUntitledOpen.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/UntitledOpen/C)
     install(FILES ${PROJECT_BINARY_DIR}/UntitledOpen.pc
-            DESTINATION lib/pkgconfig/)
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif()

@@ -9,15 +9,16 @@ namespace UOpen
     typedef UOpen_PickerOperation PickerOperation;
     typedef UOpen_WindowHandlePlatform WindowHandlePlatform;
 
-    // Wrapper class that introduces RAII to strings
+    // Wrapper class that introduces RAII to strings.
+    // This is a return type only - instances are handed out by Result and always own their string outright, with no
+    // lifetime dependency on the Result they came from
     // UntitledImGuiFramework Event Safety - Any time
     class MLS_PUBLIC_API UniqueString
     {
     public:
         UniqueString() = default;
-        explicit UniqueString(const char* dt) noexcept;
 
-        // Move-only: the wrapper uniquely owns its NFD-allocated string, so copying
+        // Move-only: the wrapper uniquely owns its string, so copying
         // would free the same pointer twice. Ownership transfers on move instead.
         UniqueString(const UniqueString&) = delete;
         UniqueString& operator=(const UniqueString&) = delete;
@@ -26,7 +27,6 @@ namespace UOpen
 
         operator const char*() const noexcept;
 
-        void destroy() const noexcept;
         ~UniqueString() noexcept;
     private:
         friend class Result;
@@ -34,11 +34,15 @@ namespace UOpen
 
         UniqueString(const char* dt, FreeTypeFunc func) noexcept;
 
+        // Private because freeing early and then letting the destructor run would free the same pointer twice.
+        // Destruction is the only way the string is released
+        void destroy() noexcept;
+
         FreeTypeFunc freeFunc = [](char*) -> void {};
         char* data = nullptr;
     };
 
-    // Picker result class
+    // Picker result class. Owns the memory the picker allocated and releases it on destruction
     // UntitledImGuiFramework Event Safety - Any time
     class MLS_PUBLIC_API Result
     {
@@ -46,19 +50,30 @@ namespace UOpen
         Result() = default;
         explicit Result(const UOpen_Result& res) noexcept;
 
+        // Move-only: the result owns the picker's allocation, so copying would free it twice
+        Result(const Result&) = delete;
+        Result& operator=(const Result&) = delete;
+        Result(Result&& other) noexcept;
+        Result& operator=(Result&& other) noexcept;
+
+        // Every getter may be called any number of times - the returned strings are independent of this object
         [[nodiscard]] std::vector<UniqueString> getPaths() const noexcept;
+        // Returns an empty string for an out of range index or an unsuccessful pick
         [[nodiscard]] UniqueString getPath(size_t i) const noexcept;
         [[nodiscard]] size_t getPathNum() const noexcept;
         [[nodiscard]] Status status() const noexcept;
+
+        ~Result() noexcept;
     private:
         UOpen_Result result{};
     };
 
     // Initialise the library. Call this after creating your window.
     // Set waylandDisplay to a non-null value to set the display on Wayland
+    // Returns UOPEN_STATUS_SUCCESS on success. On failure the pickers are unusable and destroy must not be called
     // Event Safety - begin, style, post-begin
-    MLS_PUBLIC_API void init(void* waylandDisplay = nullptr) noexcept;
-    // Free the library. Call this before closing your window
+    MLS_PUBLIC_API Status init(void* waylandDisplay = nullptr) noexcept;
+    // Free the library. Call this before closing your window. Only valid if init returned UOPEN_STATUS_SUCCESS
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API void destroy() noexcept;
 

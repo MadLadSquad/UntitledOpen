@@ -2,10 +2,16 @@
 #include <nfd.h>
 #include "UntitledOpen.hpp"
 
-void UOpen_init(void* waylandDisplay)
+UOpen_Status UOpen_init(void* waylandDisplay)
 {
-    NFD_Init();
+    // A failed init(no portal implementation on Linux, no COM on Windows) otherwise stays invisible until the first
+    // picker fails for no apparent reason
+    const auto status = static_cast<UOpen_Status>(NFD_Init());
+    if (status != UOPEN_STATUS_SUCCESS)
+        return status;
+
     UOpen_updateWaylandDisplay(waylandDisplay);
+    return status;
 }
 
 void UOpen_destroy()
@@ -129,7 +135,7 @@ const char* UOpen_getPickerError()
 
 void UOpen_freeResult(UOpen_Result* result)
 {
-    if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
+    if (result != nullptr && result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation == UOPEN_PICK_MULTIPLE || result->operation == UOPEN_PICK_MULTIPLE_FOLDERS)
             NFD_PathSet_Free(result->data);
@@ -142,10 +148,16 @@ void UOpen_freeResult(UOpen_Result* result)
 size_t UOpen_getPathCount(const UOpen_Result* result)
 {
     size_t count = 0;
-    if (result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
+    if (result != nullptr && result->data != nullptr && result->status == UOPEN_STATUS_SUCCESS)
     {
         if (result->operation == UOPEN_PICK_MULTIPLE || result->operation == UOPEN_PICK_MULTIPLE_FOLDERS)
-            NFD_PathSet_GetCount(result->data, reinterpret_cast<nfdpathsetsize_t*>(&count));
+        {
+            // nfdpathsetsize_t is narrower than size_t on Windows, so the count has to be read into its own type
+            // rather than through a reinterpreted size_t that only happens to work on little-endian machines
+            nfdpathsetsize_t pathSetCount = 0;
+            if (static_cast<UOpen_Status>(NFD_PathSet_GetCount(result->data, &pathSetCount)) == UOPEN_STATUS_SUCCESS)
+                count = pathSetCount;
+        }
         else
             count = 1;
     }
@@ -154,8 +166,18 @@ size_t UOpen_getPathCount(const UOpen_Result* result)
 
 const char* UOpen_getPathMultiple(const UOpen_Result* result, const size_t i)
 {
-    char* res;
-    if (static_cast<UOpen_Status>(NFD_PathSet_GetPathU8(result->data, i, &res)) != UOPEN_STATUS_SUCCESS)
+    if (result == nullptr || result->data == nullptr || result->status != UOPEN_STATUS_SUCCESS)
+        return nullptr;
+
+    // Only a multiple selection holds an NFD path set. Every other operation stores a plain string, and handing that
+    // to the path set API reads it as an entirely different type
+    if (result->operation != UOPEN_PICK_MULTIPLE && result->operation != UOPEN_PICK_MULTIPLE_FOLDERS)
+        return nullptr;
+    if (i >= UOpen_getPathCount(result))
+        return nullptr;
+
+    char* res = nullptr;
+    if (static_cast<UOpen_Status>(NFD_PathSet_GetPathU8(result->data, static_cast<nfdpathsetsize_t>(i), &res)) != UOPEN_STATUS_SUCCESS)
         return nullptr;
     return res;
 }

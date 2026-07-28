@@ -7,9 +7,10 @@ extern "C"
 #endif
     // Initialise the library. Call this after creating your window
     // Set waylandDisplay to a non-null value to set the display on Wayland. Defaults to nullptr
+    // Returns UOPEN_STATUS_SUCCESS on success. On failure the pickers are unusable and UOpen_destroy must not be called
     // Event Safety - begin, style, post-begin
-    MLS_PUBLIC_API void UOpen_init(void* waylandDisplay);
-    // Free the library. Call this before closing your window
+    MLS_PUBLIC_API UOpen_Status UOpen_init(void* waylandDisplay);
+    // Free the library. Call this before closing your window. Only valid if UOpen_init returned UOPEN_STATUS_SUCCESS
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API void UOpen_destroy();
 
@@ -50,7 +51,8 @@ extern "C"
     // Returns the number of paths when using UOPEN_PICK_MULTIPLE
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API size_t UOpen_getPathCount(const UOpen_Result* result);
-    // Returns a path string given an index when using UOPEN_PICK_MULTIPLE
+    // Returns a path string given an index when using UOPEN_PICK_MULTIPLE or UOPEN_PICK_MULTIPLE_FOLDERS
+    // Returns NULL for any other operation, an unsuccessful result or an out of range index
     // Event Safety - begin, style, post-begin
     MLS_PUBLIC_API const char* UOpen_getPathMultiple(const UOpen_Result* result, size_t i);
     // Frees a path when using UOPEN_PICK_MULTIPLE
