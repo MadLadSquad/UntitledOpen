@@ -32,23 +32,20 @@ void UOpen::updateWaylandDisplay(void* display)
     UOpen_updateWaylandDisplay(display);
 }
 
-namespace
+// A single pick's string belongs to the Result, which frees it on destruction, so the wrapper handed to the
+// caller gets a copy of its own. That keeps every UniqueString genuinely unique and outliving its Result
+static char* duplicateString(const char* str) noexcept
 {
-    // A single pick's string belongs to the Result, which frees it on destruction, so the wrapper handed to the
-    // caller gets a copy of its own. That keeps every UniqueString genuinely unique and outliving its Result
-    char* duplicateString(const char* str) noexcept
-    {
-        const size_t size = strlen(str) + 1;
-        auto* res = static_cast<char*>(malloc(size));
-        if (res != nullptr)
-            memcpy(res, str, size);
-        return res;
-    }
+    const size_t size = strlen(str) + 1;
+    auto* res = static_cast<char*>(malloc(size));
+    if (res != nullptr)
+        memcpy(res, str, size);
+    return res;
+}
 
-    void freeDuplicatedString(char* str) noexcept
-    {
-        free(str);
-    }
+static void freeDuplicatedString(char* str) noexcept
+{
+    free(str);
 }
 
 UOpen::Result::Result(const UOpen_Result& res) noexcept
@@ -186,41 +183,41 @@ UOpen::UniqueString::operator const char*() const noexcept
 }
 
 #if !defined(_WIN32) && !defined(__APPLE__)
-namespace
-{
-    // Decodes the percent-encoded octets(%XX) of a URI component. Invalid escapes are passed through verbatim
-    std::string percentDecode(const std::string_view str) noexcept
-    {
-        constexpr auto hexDigit = [](const char c) -> int
-        {
-            if (c >= '0' && c <= '9')
-                return c - '0';
-            if (c >= 'a' && c <= 'f')
-                return c - 'a' + 10;
-            if (c >= 'A' && c <= 'F')
-                return c - 'A' + 10;
-            return -1;
-        };
 
-        std::string result;
-        result.reserve(str.size());
-        for (size_t i = 0; i < str.size(); i++)
+static int hexDigit(const char c) noexcept
+{
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+    return -1;
+}
+
+// Decodes the percent-encoded octets(%XX) of a URI component. Invalid escapes are passed through verbatim
+static std::string percentDecode(const std::string_view str) noexcept
+{
+    std::string result;
+    result.reserve(str.size());
+
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (str[i] == '%' && i + 2 < str.size())
         {
-            if (str[i] == '%' && i + 2 < str.size())
+            const int high = hexDigit(str[i + 1]);
+            const int low = hexDigit(str[i + 2]);
+
+            if (high >= 0 && low >= 0)
             {
-                const int high = hexDigit(str[i + 1]);
-                const int low = hexDigit(str[i + 2]);
-                if (high >= 0 && low >= 0)
-                {
-                    result.push_back(static_cast<char>(high << 4 | low));
-                    i += 2;
-                    continue;
-                }
+                result.push_back(static_cast<char>(high << 4 | low));
+                i += 2;
+                continue;
             }
-            result.push_back(str[i]);
         }
-        return result;
+        result.push_back(str[i]);
     }
+    return result;
 }
 #endif
 
